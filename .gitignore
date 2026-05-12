@@ -157,6 +157,16 @@ ENV/
 env.bak/
 venv.bak/
 
+# Frontend
+node_modules/
+dist/
+.vite/
+
+# SQLite working files
+worldcup.db
+*.sqlite
+*.sqlite-journal
+
 # Spyder project settings
 .spyderproject
 .spyproject
