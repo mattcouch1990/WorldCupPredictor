@@ -17,7 +17,7 @@ Full specification is in `worldcup2026_prediction_game_brief.md` in the repo roo
 
 ## Git
 
-- **Active branch:** `feature/group-tabs` ← update this at the start of every session
+- **Active branch:** `feature/knockout-tab` ← update this at the start of every session
 - Never commit directly to `main` or `develop`
 - Commit frequently — every logical unit of work gets its own commit
 - Use conventional commit messages:
