@@ -152,6 +152,7 @@ class LeaderboardEntry(_Strict):
 
 class LeaderboardResponse(_Strict):
     entries: list[LeaderboardEntry]
+    total_tournament_goals: int | None = None
 
 
 # --------------------------------------------------------------------------- #
@@ -204,6 +205,14 @@ class TopGoalscorerIn(_Strict):
 
 class TopGoalscorerOut(_Strict):
     name: str | None = None
+
+
+class TournamentGoalsIn(_Strict):
+    total: int = Field(ge=0, le=10000)
+
+
+class TournamentGoalsOut(_Strict):
+    total: int | None = None
 
 
 class MessageResponse(_Strict):

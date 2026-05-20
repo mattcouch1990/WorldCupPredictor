@@ -14,11 +14,13 @@ from ..crud import (
     delete_user,
     get_lock_overrides,
     get_top_goalscorer,
+    get_tournament_total_goals,
     list_group_results,
     list_knockout_results,
     list_users,
     set_lock_override,
     set_top_goalscorer,
+    set_tournament_total_goals,
     upsert_group_result,
     upsert_knockout_result,
     upsert_user_score,
@@ -38,6 +40,8 @@ from ..schemas import (
     TokenResponse,
     TopGoalscorerIn,
     TopGoalscorerOut,
+    TournamentGoalsIn,
+    TournamentGoalsOut,
     UserCreatedOut,
     UserOut,
 )
@@ -277,3 +281,26 @@ async def admin_set_top_goalscorer(
 ) -> TopGoalscorerOut:
     row = await set_top_goalscorer(db, payload.name.strip())
     return TopGoalscorerOut(name=row.name)
+
+
+# --------------------------------------------------------------------------- #
+# Tournament total goals (tiebreaker reference value)
+# --------------------------------------------------------------------------- #
+
+@router.get("/tournament-goals", response_model=TournamentGoalsOut)
+async def admin_get_tournament_goals(
+    db: AsyncSession = Depends(get_db),
+    _admin: dict = Depends(get_current_admin),
+) -> TournamentGoalsOut:
+    row = await get_tournament_total_goals(db)
+    return TournamentGoalsOut(total=row.total if row else None)
+
+
+@router.post("/tournament-goals", response_model=TournamentGoalsOut)
+async def admin_set_tournament_goals(
+    payload: TournamentGoalsIn,
+    db: AsyncSession = Depends(get_db),
+    _admin: dict = Depends(get_current_admin),
+) -> TournamentGoalsOut:
+    row = await set_tournament_total_goals(db, payload.total)
+    return TournamentGoalsOut(total=row.total)

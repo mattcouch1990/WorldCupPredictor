@@ -3,7 +3,12 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..crud import get_special_prediction, list_users, upsert_user_score
+from ..crud import (
+    get_special_prediction,
+    get_tournament_total_goals,
+    list_users,
+    upsert_user_score,
+)
 from ..database import get_db
 from ..schemas import LeaderboardEntry, LeaderboardResponse
 from ..scoring import compute_user_score
@@ -38,4 +43,8 @@ async def leaderboard(db: AsyncSession = Depends(get_db)) -> LeaderboardResponse
             )
         )
     entries.sort(key=lambda e: (-e.total, e.user_id))
-    return LeaderboardResponse(entries=entries)
+    total_row = await get_tournament_total_goals(db)
+    return LeaderboardResponse(
+        entries=entries,
+        total_tournament_goals=total_row.total if total_row else None,
+    )

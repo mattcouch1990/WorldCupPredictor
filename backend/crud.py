@@ -17,6 +17,7 @@ from .models import (
     KnockoutResult,
     SpecialPrediction,
     TopGoalscorer,
+    TournamentTotalGoals,
     User,
     UserScore,
 )
@@ -369,6 +370,26 @@ async def set_top_goalscorer(db: AsyncSession, name: str) -> TopGoalscorer:
         db.add(existing)
     else:
         existing.name = name
+    await db.commit()
+    await db.refresh(existing)
+    return existing
+
+
+async def get_tournament_total_goals(db: AsyncSession) -> TournamentTotalGoals | None:
+    return (
+        await db.execute(
+            select(TournamentTotalGoals).order_by(TournamentTotalGoals.id.desc())
+        )
+    ).scalars().first()
+
+
+async def set_tournament_total_goals(db: AsyncSession, total: int) -> TournamentTotalGoals:
+    existing = await get_tournament_total_goals(db)
+    if existing is None:
+        existing = TournamentTotalGoals(total=total)
+        db.add(existing)
+    else:
+        existing.total = total
     await db.commit()
     await db.refresh(existing)
     return existing

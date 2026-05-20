@@ -165,3 +165,12 @@ class TopGoalscorer(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(120), nullable=False)
+
+
+class TournamentTotalGoals(Base):
+    """Single-row config: the confirmed total goals across the whole tournament."""
+
+    __tablename__ = "tournament_total_goals"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    total: Mapped[int] = mapped_column(Integer, nullable=False)
