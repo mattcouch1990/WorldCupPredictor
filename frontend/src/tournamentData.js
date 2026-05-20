@@ -60,3 +60,23 @@ export function fifaRank(team) {
 export function flagFor(team) {
   return FLAG_EMOJI[team] ?? "";
 }
+
+// Reconstructs the 6-fixture round-robin order used by backend/tournament_data.py.
+//   MD1: 1v2, 3v4
+//   MD2: 1v3, 4v2
+//   MD3: 4v1, 2v3
+// Returns [{ team_a, team_b, matchday }, …]. Kept in sync manually with the
+// backend; only used by the admin panel which can't hit /predictions routes.
+export function buildGroupFixtures(letter) {
+  const teams = GROUPS[letter];
+  if (!teams || teams.length !== 4) return [];
+  const [t1, t2, t3, t4] = teams;
+  return [
+    { team_a: t1, team_b: t2, matchday: 1 },
+    { team_a: t3, team_b: t4, matchday: 1 },
+    { team_a: t1, team_b: t3, matchday: 2 },
+    { team_a: t4, team_b: t2, matchday: 2 },
+    { team_a: t4, team_b: t1, matchday: 3 },
+    { team_a: t2, team_b: t3, matchday: 3 },
+  ];
+}

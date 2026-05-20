@@ -7,6 +7,7 @@ import {
 import { AuthProvider, useAuth } from "./AuthContext";
 import MainLayout from "./components/MainLayout";
 import RequireAuth from "./components/RequireAuth";
+import AdminPanel from "./pages/AdminPanel";
 import GroupTab from "./pages/GroupTab";
 import KnockoutTab from "./pages/KnockoutTab";
 import LeaderboardTab from "./pages/LeaderboardTab";
@@ -23,6 +24,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginGate />} />
+          <Route path="/admin" element={<AdminPanel />} />
           <Route
             path="/"
             element={
