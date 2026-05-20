@@ -4,10 +4,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth import get_current_user
-from ..crud import get_lock_overrides, list_group_results
+from ..crud import get_lock_overrides, list_group_results, list_knockout_results
 from ..database import get_db
 from ..models import User
-from ..schemas import GroupResultOut, LockState, LockStatusResponse
+from ..schemas import GroupResultOut, KnockoutResultOut, LockState, LockStatusResponse
 from ..tournament_data import GROUPS, get_lock_status
 
 router = APIRouter(prefix="/tournament", tags=["tournament"])
@@ -35,3 +35,12 @@ async def group_results(
         raise HTTPException(status_code=404, detail=f"Unknown group: {group_letter}")
     rows = await list_group_results(db, group=group_letter)
     return [GroupResultOut.model_validate(r) for r in rows]
+
+
+@router.get("/results/knockout", response_model=list[KnockoutResultOut])
+async def knockout_results(
+    db: AsyncSession = Depends(get_db),
+    _user: User = Depends(get_current_user),
+) -> list[KnockoutResultOut]:
+    rows = await list_knockout_results(db)
+    return [KnockoutResultOut.model_validate(r) for r in rows]

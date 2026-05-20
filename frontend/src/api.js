@@ -103,10 +103,18 @@ export function getGroupResults(group) {
   return request(`/tournament/results/group/${group}`);
 }
 
+export function getKnockoutResults() {
+  return request("/tournament/results/knockout");
+}
+
 // --- Predictions ---------------------------------------------------------
 
 export function getGroupPredictions(group) {
   return request(`/predictions/group/${group}`);
+}
+
+export function getAllGroupPredictions() {
+  return request("/predictions/group/all");
 }
 
 export function patchGroupPrediction(group, teamA, teamB, goalsA, goalsB) {
@@ -118,5 +126,31 @@ export function patchGroupPrediction(group, teamA, teamB, goalsA, goalsB) {
       pred_goals_a: goalsA,
       pred_goals_b: goalsB,
     },
+  });
+}
+
+export function getKnockoutPredictions() {
+  return request("/predictions/knockout");
+}
+
+export function patchKnockoutPrediction(round, slotIndex, predictedTeam) {
+  return request("/predictions/knockout", {
+    method: "PATCH",
+    body: {
+      round,
+      slot_index: slotIndex,
+      predicted_team: predictedTeam,
+    },
+  });
+}
+
+export function getSpecialPredictions() {
+  return request("/predictions/special");
+}
+
+export function patchSpecialPredictions(payload) {
+  return request("/predictions/special", {
+    method: "PATCH",
+    body: payload,
   });
 }

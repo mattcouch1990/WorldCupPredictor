@@ -16,6 +16,7 @@ from ..crud import (
 from ..database import get_db
 from ..models import User
 from ..schemas import (
+    AllGroupPredictionsResponse,
     GroupFixtureOut,
     GroupPredictionOut,
     GroupPredictionPatch,
@@ -53,6 +54,27 @@ async def _check_lock(db: AsyncSession, round_name: str) -> None:
             status_code=status.HTTP_423_LOCKED,
             detail=f"Predictions for {round_name} are locked",
         )
+
+
+@router.get("/group/all", response_model=AllGroupPredictionsResponse)
+async def get_all_group_predictions(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> AllGroupPredictionsResponse:
+    rows = await list_group_predictions(db, user.id)
+    by_group: dict[str, list[GroupPredictionOut]] = {letter: [] for letter in GROUPS}
+    for r in rows:
+        if r.group in by_group:
+            by_group[r.group].append(GroupPredictionOut.model_validate(r))
+    groups = {
+        letter: GroupPredictionsResponse(
+            group=letter,
+            fixtures=[GroupFixtureOut(**fx) for fx in GROUP_FIXTURES[letter]],
+            predictions=by_group[letter],
+        )
+        for letter in GROUPS
+    }
+    return AllGroupPredictionsResponse(groups=groups)
 
 
 @router.get("/group/{group_letter}", response_model=GroupPredictionsResponse)

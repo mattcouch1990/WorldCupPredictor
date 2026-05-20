@@ -86,6 +86,10 @@ class GroupPredictionsResponse(_Strict):
     predictions: list[GroupPredictionOut]
 
 
+class AllGroupPredictionsResponse(_Strict):
+    groups: dict[str, GroupPredictionsResponse]
+
+
 class KnockoutPredictionOut(_ORM):
     round: str
     slot_index: int
