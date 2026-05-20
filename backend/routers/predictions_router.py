@@ -185,7 +185,7 @@ async def patch_special(
     if payload.predicted_third is not None and payload.predicted_third not in teams:
         raise HTTPException(status_code=400, detail="Unknown third place team")
 
-    await _check_lock(db, "groups")
+    await _check_lock(db, "FINAL")
 
     row = await upsert_special_prediction(
         db,
