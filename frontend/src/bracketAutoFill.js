@@ -10,27 +10,28 @@ import { fifaRank } from "./tournamentData";
 // Match -> (group-winner, runner-up) matchups that don't depend on the
 // best-3rds outcome. `slot` here is a *match index* (0..15); each match
 // fills two backend slot_index values: `slot*2` and `slot*2 + 1`.
+// Matches with no third-place team involved
 export const R32_FIXED = [
-  { slot: 0, team1: "winner_C", team2: "runner_up_F" },
-  { slot: 1, team1: "winner_F", team2: "runner_up_C" },
-  { slot: 2, team1: "runner_up_E", team2: "runner_up_I" },
-  { slot: 3, team1: "winner_H", team2: "runner_up_J" },
-  { slot: 4, team1: "winner_J", team2: "runner_up_G" },
-  { slot: 5, team1: "winner_B", team2: "runner_up_K" },
-  { slot: 6, team1: "winner_K", team2: "runner_up_B" },
-  { slot: 7, team1: "winner_A", team2: "runner_up_L" },
-  { slot: 8, team1: "winner_L", team2: "runner_up_A" },
+  { slot: 0,  team1: "runner_up_A", team2: "runner_up_B" },  // M73
+  { slot: 1,  team1: "winner_F",    team2: "runner_up_C" },  // M75
+  { slot: 2,  team1: "winner_C",    team2: "runner_up_F" },  // M76
+  { slot: 3,  team1: "runner_up_E", team2: "runner_up_I" },  // M78
+  { slot: 4,  team1: "runner_up_K", team2: "runner_up_L" },  // M83
+  { slot: 5,  team1: "winner_H",    team2: "runner_up_J" },  // M84
+  { slot: 6,  team1: "winner_J",    team2: "runner_up_H" },  // M86
+  { slot: 7,  team1: "runner_up_D", team2: "runner_up_G" },  // M88
 ];
 
-// Group winner + best-available 3rd-place team from eligibleGroups.
+// Matches where a group winner faces a best-3rd-place team
 export const R32_THIRD_PLACE_SLOTS = [
-  { slot: 9, winner: "winner_E", eligibleGroups: ["A", "B", "C", "D", "F"] },
-  { slot: 10, winner: "winner_I", eligibleGroups: ["C", "D", "F", "G", "H"] },
-  { slot: 11, winner: "winner_A", eligibleGroups: ["C", "E", "F", "H", "I"] },
-  { slot: 12, winner: "winner_L", eligibleGroups: ["E", "H", "I", "J", "K"] },
-  { slot: 13, winner: "winner_G", eligibleGroups: ["A", "E", "H", "I", "J"] },
-  { slot: 14, winner: "winner_D", eligibleGroups: ["B", "E", "F", "I", "J"] },
-  { slot: 15, winner: "winner_K", eligibleGroups: ["D", "E", "I", "J", "L"] },
+  { slot: 8,  winner: "winner_E", eligibleGroups: ["A","B","C","D","F"] }, // M74
+  { slot: 9,  winner: "winner_I", eligibleGroups: ["C","D","F","G","H"] }, // M77
+  { slot: 10, winner: "winner_A", eligibleGroups: ["C","E","F","H","I"] }, // M79
+  { slot: 11, winner: "winner_L", eligibleGroups: ["E","H","I","J","K"] }, // M80
+  { slot: 12, winner: "winner_D", eligibleGroups: ["B","E","F","I","J"] }, // M81
+  { slot: 13, winner: "winner_G", eligibleGroups: ["A","E","H","I","J"] }, // M82
+  { slot: 14, winner: "winner_B", eligibleGroups: ["E","F","G","I","J"] }, // M85
+  { slot: 15, winner: "winner_K", eligibleGroups: ["D","E","I","J","L"] }, // M87
 ];
 
 export function rankThirdPlaceTeams(thirds) {

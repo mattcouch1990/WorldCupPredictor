@@ -1,6 +1,7 @@
 """Static tournament data for the 2026 FIFA World Cup.
 
-Includes groups, fixtures, flags, FIFA rankings, and lock-time helpers.
+Includes groups, fixtures, flags, FIFA rankings, lock-time helpers,
+and the official R32 bracket structure.
 Dates and venues here are placeholders consistent with the published WC 2026
 window (11 June – 19 July 2026); they exist for frontend display only.
 The backend's only date-driven logic is the lock-status computation.
@@ -164,10 +165,10 @@ FIFA_RANKINGS: dict[str, int] = {
 PREDICTION_LOCK_UTC: str = os.getenv("PREDICTION_LOCK_UTC", "2026-06-11T20:00:00Z")
 
 KNOCKOUT_LOCK_DATES: dict[str, str] = {
-    "R16": "2026-07-04T17:00:00Z",
-    "QF": "2026-07-09T20:00:00Z",
-    "SF": "2026-07-14T20:00:00Z",
-    "FINAL": "2026-07-19T19:00:00Z",
+    "R16":   "2026-07-04T17:00:00Z",   # first R16 match (July 4, Houston)
+    "QF":    "2026-07-09T20:00:00Z",   # first QF match
+    "SF":    "2026-07-14T20:00:00Z",   # first SF match
+    "FINAL": "2026-07-19T19:00:00Z",   # Final kick-off, MetLife Stadium
 }
 
 LOCK_ROUNDS: tuple[str, ...] = ("groups", "R32", "R16", "QF", "SF", "FINAL")
@@ -192,11 +193,11 @@ def get_lock_status(
 
     schedule: dict[str, str] = {
         "groups": PREDICTION_LOCK_UTC,
-        "R32": PREDICTION_LOCK_UTC,
-        "R16": KNOCKOUT_LOCK_DATES["R16"],
-        "QF": KNOCKOUT_LOCK_DATES["QF"],
-        "SF": KNOCKOUT_LOCK_DATES["SF"],
-        "FINAL": KNOCKOUT_LOCK_DATES["FINAL"],
+        "R32":    PREDICTION_LOCK_UTC,
+        "R16":    KNOCKOUT_LOCK_DATES["R16"],
+        "QF":     KNOCKOUT_LOCK_DATES["QF"],
+        "SF":     KNOCKOUT_LOCK_DATES["SF"],
+        "FINAL":  KNOCKOUT_LOCK_DATES["FINAL"],
     }
 
     result: dict[str, dict] = {}
@@ -218,21 +219,86 @@ def get_lock_status(
 
 
 # --------------------------------------------------------------------------- #
-# Bracket structure
+# R32 bracket structure  (official FIFA schedule, confirmed Dec 2025)
 # --------------------------------------------------------------------------- #
-# R32 slot count is 32 (16 matches, paired as (0,1), (2,3), ... (30,31)).
-# R16 is 16, QF is 8, SF is 4, FINAL is 2. We also track the 3rd-place play-off
-# slot count as 2. slot_index is zero-based throughout.
+#
+# Mathematical structure across 16 R32 matches:
+#   4 × Winner vs Runner-up      (matches 75, 76, 84, 86)
+#   8 × Winner vs 3rd-place      (matches 74, 77, 79, 80, 81, 82, 85, 87)
+#   4 × Runner-up vs Runner-up   (matches 73, 78, 83, 88)
+#
+# `slot` here is the MATCH index (0-based, 0..15). Each match occupies two
+# backend slot_index values: slot*2 (team 1) and slot*2+1 (team 2).
+#
+# Key: "winner_X"    = 1st-place finisher from group X
+#      "runner_up_X" = 2nd-place finisher from group X
+#
+# R32_FIXED: matches where both teams are fully determined by group position
+# (winner or runner-up). No dependency on which 3rd-place teams qualify.
+#
+# R32_THIRD_PLACE_SLOTS: matches where a group winner faces whichever
+# qualifying 3rd-place team comes from the listed eligible groups.
+# Assignment is done greedily: iterate through ranked 3rd-place qualifiers
+# (best first) and assign each to the first unfilled slot whose eligibleGroups
+# contains that team's group letter.
+
+R32_FIXED: list[dict] = [
+    # match  team1              team2          FIFA match #
+    {"slot": 0,  "team1": "runner_up_A", "team2": "runner_up_B"},  # M73
+    {"slot": 1,  "team1": "winner_F",    "team2": "runner_up_C"},  # M75
+    {"slot": 2,  "team1": "winner_C",    "team2": "runner_up_F"},  # M76
+    {"slot": 3,  "team1": "runner_up_E", "team2": "runner_up_I"},  # M78
+    {"slot": 4,  "team1": "runner_up_K", "team2": "runner_up_L"},  # M83
+    {"slot": 5,  "team1": "winner_H",    "team2": "runner_up_J"},  # M84
+    {"slot": 6,  "team1": "winner_J",    "team2": "runner_up_H"},  # M86
+    {"slot": 7,  "team1": "runner_up_D", "team2": "runner_up_G"},  # M88
+]
+
+R32_THIRD_PLACE_SLOTS: list[dict] = [
+    # match  winner        eligible groups for 3rd-place opponent   FIFA match #
+    {"slot": 8,  "winner": "winner_E", "eligible_groups": ["A", "B", "C", "D", "F"]},  # M74
+    {"slot": 9,  "winner": "winner_I", "eligible_groups": ["C", "D", "F", "G", "H"]},  # M77
+    {"slot": 10, "winner": "winner_A", "eligible_groups": ["C", "E", "F", "H", "I"]},  # M79
+    {"slot": 11, "winner": "winner_L", "eligible_groups": ["E", "H", "I", "J", "K"]},  # M80
+    {"slot": 12, "winner": "winner_D", "eligible_groups": ["B", "E", "F", "I", "J"]},  # M81
+    {"slot": 13, "winner": "winner_G", "eligible_groups": ["A", "E", "H", "I", "J"]},  # M82
+    {"slot": 14, "winner": "winner_B", "eligible_groups": ["E", "F", "G", "I", "J"]},  # M85
+    {"slot": 15, "winner": "winner_K", "eligible_groups": ["D", "E", "I", "J", "L"]},  # M87
+]
+
+# R16 bracket: which pairs of R32 match winners play each other.
+# Expressed as pairs of R32 slot indices (match numbers, 0-based).
+# e.g. (0, 1) means the winner of R32 match 0 plays the winner of R32 match 1.
+R16_BRACKET: list[tuple[int, int]] = [
+    (0, 1),    # M73 winner vs M75 winner  → R16 M90
+    (2, 3),    # M76 winner vs M78 winner  → R16 M91
+    (4, 5),    # M83 winner vs M84 winner  → R16 M93
+    (6, 7),    # M86 winner vs M88 winner  → R16 M95 (inferred)
+    (8, 9),    # M74 winner vs M77 winner  → R16 M89
+    (10, 11),  # M79 winner vs M80 winner  → R16 M92
+    (12, 13),  # M81 winner vs M82 winner  → R16 M94
+    (14, 15),  # M85 winner vs M87 winner  → R16 M96
+]
+
+
+# --------------------------------------------------------------------------- #
+# Bracket slot counts (used by models and validation)
+# --------------------------------------------------------------------------- #
 
 ROUND_SLOT_COUNTS: dict[str, int] = {
-    "R32": 32,
-    "R16": 16,
-    "QF": 8,
-    "SF": 4,
-    "FINAL": 2,
-    "THIRD": 2,
+    "R32":   32,   # 16 matches × 2 teams
+    "R16":   16,   # 8 matches × 2 teams
+    "QF":    8,    # 4 matches × 2 teams
+    "SF":    4,    # 2 matches × 2 teams
+    "FINAL": 2,    # 1 match × 2 teams
+    "THIRD": 2,    # 3rd-place play-off × 2 teams
 }
 
 
+# --------------------------------------------------------------------------- #
+# Helpers
+# --------------------------------------------------------------------------- #
+
 def all_teams() -> list[str]:
+    """Return all 48 tournament teams in group order."""
     return [team for teams in GROUPS.values() for team in teams]
