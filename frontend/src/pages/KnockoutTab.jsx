@@ -417,7 +417,7 @@ function ThirdPlaceSection({
         </div>
         <div className="flex items-center justify-between gap-2">
           <span className="text-xs text-slate-500 w-16 shrink-0">
-            3rd place
+            SF loser 2
           </span>
           {locked ? (
             <div

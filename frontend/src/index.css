@@ -8,6 +8,10 @@ html, body, #root {
 }
 
 body {
-  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+  /* Emoji-capable fonts must be in the stack or browsers won't fall back to
+     them for regional-indicator pairs (🇲🇽 etc.) — without these, Segoe UI on
+     Windows renders flag emoji as their two-letter country codes. */
+  font-family: system-ui, "Segoe UI", Roboto, "Apple Color Emoji",
+    "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
