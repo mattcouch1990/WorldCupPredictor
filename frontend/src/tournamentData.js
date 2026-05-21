@@ -61,6 +61,44 @@ export function flagFor(team) {
   return FLAG_EMOJI[team] ?? "";
 }
 
+// ISO 3166-1 alpha-2 codes (and gb-* subdivisions for the home nations) used
+// by flagcdn.com — see the FlagImg component. Subdivision flag emoji like
+// England/Scotland render as plain black flags in most Chromium font stacks,
+// so we render every flag as a flagcdn image for consistency. Wales is here
+// for completeness even though they did not qualify.
+export const COUNTRY_CODE = {
+  // Group A
+  "Mexico": "mx", "South Africa": "za", "South Korea": "kr", "Czechia": "cz",
+  // Group B
+  "Canada": "ca", "Bosnia and Herzegovina": "ba", "Qatar": "qa", "Switzerland": "ch",
+  // Group C
+  "Brazil": "br", "Morocco": "ma", "Haiti": "ht", "Scotland": "gb-sct",
+  // Group D
+  "United States": "us", "Paraguay": "py", "Australia": "au", "Turkey": "tr",
+  // Group E
+  "Germany": "de", "Curaçao": "cw", "Ivory Coast": "ci", "Ecuador": "ec",
+  // Group F
+  "Netherlands": "nl", "Japan": "jp", "Sweden": "se", "Tunisia": "tn",
+  // Group G
+  "Belgium": "be", "Egypt": "eg", "Iran": "ir", "New Zealand": "nz",
+  // Group H
+  "Spain": "es", "Cape Verde": "cv", "Saudi Arabia": "sa", "Uruguay": "uy",
+  // Group I
+  "France": "fr", "Senegal": "sn", "Iraq": "iq", "Norway": "no",
+  // Group J
+  "Argentina": "ar", "Algeria": "dz", "Austria": "at", "Jordan": "jo",
+  // Group K
+  "Portugal": "pt", "DR Congo": "cd", "Uzbekistan": "uz", "Colombia": "co",
+  // Group L
+  "England": "gb-eng", "Croatia": "hr", "Ghana": "gh", "Panama": "pa",
+  // Non-tournament home nation kept for completeness
+  "Wales": "gb-wls",
+};
+
+export function countryCodeFor(team) {
+  return COUNTRY_CODE[team] ?? null;
+}
+
 // Reconstructs the 6-fixture round-robin order used by backend/tournament_data.py.
 //   MD1: 1v2, 3v4
 //   MD2: 1v3, 4v2

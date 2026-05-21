@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FLAG_EMOJI, GROUPS } from "../tournamentData";
+import { GROUPS } from "../tournamentData";
+import { FlagImg } from "./FlagImg";
 
 const ALL_TEAMS = Object.values(GROUPS).flat();
 
@@ -81,9 +82,7 @@ export default function TeamAutocomplete({
       <div className="flex items-center gap-2 px-2 py-1 text-sm">
         {value ? (
           <>
-            <span className="text-base leading-none">
-              {FLAG_EMOJI[value] || ""}
-            </span>
+            <FlagImg team={value} />
             <span className="truncate">{value}</span>
           </>
         ) : (
@@ -110,9 +109,7 @@ export default function TeamAutocomplete({
       >
         {value ? (
           <>
-            <span className="text-base leading-none">
-              {FLAG_EMOJI[value] || ""}
-            </span>
+            <FlagImg team={value} />
             <span className="truncate flex-1">{value}</span>
           </>
         ) : (
@@ -153,9 +150,7 @@ export default function TeamAutocomplete({
                     : "hover:bg-slate-50"
                 }`}
               >
-                <span className="text-base leading-none">
-                  {FLAG_EMOJI[team] || ""}
-                </span>
+                <FlagImg team={team} />
                 <span className="truncate">{team}</span>
               </li>
             ))}

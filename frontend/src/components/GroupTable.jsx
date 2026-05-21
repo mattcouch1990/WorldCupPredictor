@@ -1,4 +1,4 @@
-import { flagFor } from "../tournamentData";
+import { FlagImg } from "./FlagImg";
 
 const POSITION_STYLE = {
   1: "border-l-4 border-emerald-500 bg-emerald-50",
@@ -44,7 +44,7 @@ export default function GroupTable({ rows, title, variant = "predicted" }) {
                 >
                   <td className="py-2 px-2 font-semibold">{pos}</td>
                   <td className="py-2 px-2">
-                    <span className="mr-2 align-middle">{flagFor(row.team)}</span>
+                    <FlagImg team={row.team} className="mr-2" />
                     <span className="align-middle">{row.team}</span>
                   </td>
                   <td className="py-2 px-2 text-center">{row.played}</td>

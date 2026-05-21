@@ -1,4 +1,4 @@
-import { flagFor } from "../tournamentData";
+import { FlagImg } from "./FlagImg";
 
 function parseGoals(value) {
   if (value === "" || value === null || value === undefined) return null;
@@ -36,7 +36,7 @@ export default function FixtureRow({
   return (
     <div className="bg-white border border-slate-200 rounded-xl px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        <span className="text-xl">{flagFor(fixture.team_a)}</span>
+        <FlagImg team={fixture.team_a} />
         <span className="font-medium truncate">{fixture.team_a}</span>
       </div>
 
@@ -66,7 +66,7 @@ export default function FixtureRow({
 
       <div className="flex items-center gap-3 flex-1 min-w-0 sm:justify-end">
         <span className="font-medium truncate sm:text-right">{fixture.team_b}</span>
-        <span className="text-xl">{flagFor(fixture.team_b)}</span>
+        <FlagImg team={fixture.team_b} />
       </div>
 
       <div className="text-xs text-slate-400 sm:w-20 sm:text-right">

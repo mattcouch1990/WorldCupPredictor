@@ -1,6 +1,6 @@
 import { Fragment } from "react";
-import { FLAG_EMOJI } from "../tournamentData";
 import TeamAutocomplete from "./TeamAutocomplete";
+import { FlagImg } from "./FlagImg";
 
 // Bracket tree for R32 → R16 → QF → SF → FINAL.
 //
@@ -36,8 +36,6 @@ const COLUMN_WIDTH = 168;
 const CONNECTOR_WIDTH = 28;
 
 function Slot({ team, onChange, disabled, status, highlight }) {
-  const flag = team ? FLAG_EMOJI[team] || "" : "";
-
   const highlightClasses =
     highlight === "correct"
       ? "bg-green-100 border-green-300 text-green-900"
@@ -57,7 +55,7 @@ function Slot({ team, onChange, disabled, status, highlight }) {
       >
         {team ? (
           <>
-            <span className="text-sm leading-none shrink-0">{flag}</span>
+            <FlagImg team={team} className="shrink-0" />
             <span className="truncate">{team}</span>
           </>
         ) : (

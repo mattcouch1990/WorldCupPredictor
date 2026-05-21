@@ -31,7 +31,7 @@ export default function Login() {
         className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-8 space-y-5 border border-slate-200"
       >
         <div className="text-center space-y-1">
-          <div className="text-3xl">⚽</div>
+          <div className="text-3xl">🏆</div>
           <h1 className="text-xl font-semibold tracking-tight">WC2026 Predictions</h1>
           <p className="text-sm text-slate-500">Log in with the email and passcode from the admin</p>
         </div>

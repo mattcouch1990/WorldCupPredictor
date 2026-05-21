@@ -11,7 +11,7 @@ import BracketTree from "../components/BracketTree";
 import { useLockStatus } from "../components/MainLayout";
 import TeamAutocomplete from "../components/TeamAutocomplete";
 import { autoFillBracket } from "../bracketAutoFill";
-import { FLAG_EMOJI } from "../tournamentData";
+import { FlagImg } from "../components/FlagImg";
 
 const SAVED_FLASH_MS = 1800;
 
@@ -398,7 +398,7 @@ function ThirdPlaceSection({
             >
               {t1 ? (
                 <>
-                  <span>{FLAG_EMOJI[t1] || ""}</span>
+                  <FlagImg team={t1} />
                   <span>{t1}</span>
                 </>
               ) : (
@@ -428,7 +428,7 @@ function ThirdPlaceSection({
             >
               {t2 ? (
                 <>
-                  <span>{FLAG_EMOJI[t2] || ""}</span>
+                  <FlagImg team={t2} />
                   <span>{t2}</span>
                 </>
               ) : (
@@ -590,7 +590,7 @@ function ReadOnlyTeam({ team }) {
     <div className="flex items-center gap-2 px-2 py-1.5 text-sm rounded border border-slate-200 bg-slate-50">
       {team ? (
         <>
-          <span>{FLAG_EMOJI[team] || ""}</span>
+          <FlagImg team={team} />
           <span>{team}</span>
         </>
       ) : (
