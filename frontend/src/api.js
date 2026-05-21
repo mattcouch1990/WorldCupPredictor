@@ -1,6 +1,11 @@
 // Centralised fetch wrapper. Every component goes through these helpers so
 // JWT handling and 401 redirects live in exactly one place.
 
+// In production the SPA is served by the frontend nginx container, which
+// proxies /api/* to the backend. In dev the Vite proxy handles bare paths
+// like /auth, /tournament, etc. — so API_BASE must be empty there.
+const API_BASE = import.meta.env.PROD ? "/api" : "";
+
 const TOKEN_KEY = "wc2026_token";
 const ADMIN_TOKEN_KEY = "wc2026_admin_token";
 
@@ -41,7 +46,7 @@ async function request(path, { method = "GET", body, auth = true } = {}) {
 
   let res;
   try {
-    res = await fetch(path, {
+    res = await fetch(`${API_BASE}${path}`, {
       method,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
@@ -183,7 +188,7 @@ async function adminFetch(path, { method = "GET", body } = {}) {
 
   let res;
   try {
-    res = await fetch(path, {
+    res = await fetch(`${API_BASE}${path}`, {
       method,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
@@ -224,7 +229,7 @@ async function adminFetch(path, { method = "GET", body } = {}) {
 }
 
 export function adminLogin(password) {
-  return fetch("/admin/login", {
+  return fetch(`${API_BASE}/admin/login`, {
     method: "POST",
     headers: { Accept: "application/json", "Content-Type": "application/json" },
     body: JSON.stringify({ password }),
