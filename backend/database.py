@@ -10,7 +10,7 @@ from sqlalchemy.orm import DeclarativeBase
 
 load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./worldcup.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:////app/data/worldcup.db")
 
 engine = create_async_engine(DATABASE_URL, echo=False, future=True)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
