@@ -3,12 +3,12 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..auth import (
+from auth import (
     create_token,
     get_current_admin,
     verify_admin_password,
 )
-from ..crud import (
+from crud import (
     clear_lock_override,
     create_user,
     delete_user,
@@ -25,8 +25,8 @@ from ..crud import (
     upsert_knockout_result,
     upsert_user_score,
 )
-from ..database import get_db
-from ..schemas import (
+from database import get_db
+from schemas import (
     AdminLoginRequest,
     AdminUserCreateRequest,
     GroupResultIn,
@@ -45,8 +45,8 @@ from ..schemas import (
     UserCreatedOut,
     UserOut,
 )
-from ..scoring import compute_user_score
-from ..tournament_data import (
+from scoring import compute_user_score
+from tournament_data import (
     GROUP_FIXTURES,
     LOCK_ROUNDS,
     ROUND_SLOT_COUNTS,

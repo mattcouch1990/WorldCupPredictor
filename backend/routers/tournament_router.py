@@ -3,12 +3,12 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..auth import get_current_user
-from ..crud import get_lock_overrides, list_group_results, list_knockout_results
-from ..database import get_db
-from ..models import User
-from ..schemas import GroupResultOut, KnockoutResultOut, LockState, LockStatusResponse
-from ..tournament_data import GROUPS, get_lock_status
+from auth import get_current_user
+from crud import get_lock_overrides, list_group_results, list_knockout_results
+from database import get_db
+from models import User
+from schemas import GroupResultOut, KnockoutResultOut, LockState, LockStatusResponse
+from tournament_data import GROUPS, get_lock_status
 
 router = APIRouter(prefix="/tournament", tags=["tournament"])
 

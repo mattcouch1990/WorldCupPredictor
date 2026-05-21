@@ -8,12 +8,12 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .database import init_db
-from .routers.admin_router import router as admin_router
-from .routers.auth_router import router as auth_router
-from .routers.leaderboard_router import router as leaderboard_router
-from .routers.predictions_router import router as predictions_router
-from .routers.tournament_router import router as tournament_router
+from database import init_db
+from routers.admin_router import router as admin_router
+from routers.auth_router import router as auth_router
+from routers.leaderboard_router import router as leaderboard_router
+from routers.predictions_router import router as predictions_router
+from routers.tournament_router import router as tournament_router
 
 load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 

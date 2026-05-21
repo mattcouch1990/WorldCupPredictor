@@ -3,8 +3,8 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..auth import get_current_user
-from ..crud import (
+from auth import get_current_user
+from crud import (
     get_lock_overrides,
     get_special_prediction,
     list_group_predictions,
@@ -13,9 +13,9 @@ from ..crud import (
     upsert_knockout_prediction,
     upsert_special_prediction,
 )
-from ..database import get_db
-from ..models import User
-from ..schemas import (
+from database import get_db
+from models import User
+from schemas import (
     AllGroupPredictionsResponse,
     GroupFixtureOut,
     GroupPredictionOut,
@@ -27,7 +27,7 @@ from ..schemas import (
     SpecialPredictionOut,
     SpecialPredictionPatch,
 )
-from ..tournament_data import (
+from tournament_data import (
     GROUP_FIXTURES,
     GROUPS,
     ROUND_SLOT_COUNTS,

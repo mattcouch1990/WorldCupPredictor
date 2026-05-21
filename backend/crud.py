@@ -8,8 +8,8 @@ import string
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .auth import hash_passcode
-from .models import (
+from auth import hash_passcode
+from models import (
     AdminLockOverride,
     GroupPrediction,
     GroupResult,

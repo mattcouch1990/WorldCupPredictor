@@ -22,7 +22,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .models import (
+from models import (
     GroupPrediction,
     GroupResult,
     KnockoutPrediction,
@@ -30,7 +30,7 @@ from .models import (
     SpecialPrediction,
     TopGoalscorer,
 )
-from .tournament_data import FIFA_RANKINGS, GROUP_FIXTURES, GROUPS
+from tournament_data import FIFA_RANKINGS, GROUP_FIXTURES, GROUPS
 
 
 # --------------------------------------------------------------------------- #

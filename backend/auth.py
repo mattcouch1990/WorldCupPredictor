@@ -12,8 +12,8 @@ from jose import JWTError, jwt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .database import get_db
-from .models import User
+from database import get_db
+from models import User
 
 load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 

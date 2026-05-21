@@ -3,15 +3,15 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..crud import (
+from crud import (
     get_special_prediction,
     get_tournament_total_goals,
     list_users,
     upsert_user_score,
 )
-from ..database import get_db
-from ..schemas import LeaderboardEntry, LeaderboardResponse
-from ..scoring import compute_user_score
+from database import get_db
+from schemas import LeaderboardEntry, LeaderboardResponse
+from scoring import compute_user_score
 
 router = APIRouter(tags=["leaderboard"])
 

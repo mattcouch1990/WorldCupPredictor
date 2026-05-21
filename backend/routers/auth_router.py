@@ -3,11 +3,11 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..auth import create_token, get_current_user, verify_passcode
-from ..crud import get_user_by_email, set_profile
-from ..database import get_db
-from ..models import User
-from ..schemas import (
+from auth import create_token, get_current_user, verify_passcode
+from crud import get_user_by_email, set_profile
+from database import get_db
+from models import User
+from schemas import (
     LoginRequest,
     ProfileRequest,
     TokenResponse,
