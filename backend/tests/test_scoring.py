@@ -20,10 +20,10 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
-from backend.database import Base  # noqa: E402
-from backend.models import (  # noqa: E402
+from database import Base  # noqa: E402
+from models import (  # noqa: E402
     GroupPrediction,
     GroupResult,
     KnockoutPrediction,
@@ -32,7 +32,7 @@ from backend.models import (  # noqa: E402
     TopGoalscorer,
     User,
 )
-from backend.scoring import (  # noqa: E402
+from scoring import (  # noqa: E402
     compute_group_table,
     compute_user_score,
     rank_third_place_teams,
@@ -181,8 +181,9 @@ async def session() -> AsyncGenerator[AsyncSession, None]:
 
 @pytest.mark.asyncio
 async def test_compute_user_score_mixed_predictions(session: AsyncSession) -> None:
-    """A user with one exact score, one correct-result-only, one wrong result,
-    one correct R32 pick, one correct winner pick, and a matching top-scorer."""
+    """Exercises set-based knockout scoring: teams predicted in the wrong slot
+    still score, both finalists count when both are correctly predicted, and
+    3rd place is awarded by set membership against the actual THIRD round."""
     user = User(email="player@example.com", passcode_hash="x", team_name="T", real_name="R")
     session.add(user)
     await session.commit()
@@ -220,29 +221,48 @@ async def test_compute_user_score_mixed_predictions(session: AsyncSession) -> No
                     actual_goals_a=0, actual_goals_b=1),
     ])
 
-    # Knockout predictions
+    # Knockout predictions — slot positions deliberately disagree with actuals
+    # to prove set membership (not slot match) drives scoring.
     session.add_all([
+        # R32: predicts Brazil/Spain/Germany; only Brazil and Germany actually
+        # make R32, both in slots that differ from the user's picks.
         KnockoutPrediction(user_id=user.id, round="R32", slot_index=0, predicted_team="Brazil"),
         KnockoutPrediction(user_id=user.id, round="R32", slot_index=1, predicted_team="Spain"),
+        KnockoutPrediction(user_id=user.id, round="R32", slot_index=2, predicted_team="Germany"),
+        # R16: predicts Brazil in slot 0, but Brazil actually appears in slot 1.
+        # Old slot-based logic awarded 0; new set-based logic awards 8.
         KnockoutPrediction(user_id=user.id, round="R16", slot_index=0, predicted_team="Brazil"),
+        KnockoutPrediction(user_id=user.id, round="R16", slot_index=1, predicted_team="England"),
+        # FINAL: predicts both finalists, but with the slots swapped vs reality.
+        # Both should still count → 2 * 64 = 128.
+        KnockoutPrediction(user_id=user.id, round="FINAL", slot_index=0, predicted_team="France"),
+        KnockoutPrediction(user_id=user.id, round="FINAL", slot_index=1, predicted_team="Argentina"),
     ])
     session.add_all([
-        KnockoutResult(round="R32", slot_index=0, actual_team="Brazil", match_played=True),  # +4
-        KnockoutResult(round="R32", slot_index=1, actual_team="Portugal", match_played=True),  # 0
-        KnockoutResult(round="R16", slot_index=0, actual_team="Argentina", match_played=True),  # 0
+        KnockoutResult(round="R32", slot_index=0, actual_team="Argentina", match_played=True),
+        KnockoutResult(round="R32", slot_index=1, actual_team="Portugal", match_played=True),
+        KnockoutResult(round="R32", slot_index=5, actual_team="Brazil", match_played=True),
+        KnockoutResult(round="R32", slot_index=7, actual_team="Germany", match_played=True),
+        KnockoutResult(round="R16", slot_index=0, actual_team="France", match_played=True),
+        KnockoutResult(round="R16", slot_index=1, actual_team="Brazil", match_played=True),
+        KnockoutResult(round="FINAL", slot_index=0, actual_team="Argentina", match_played=True),
+        KnockoutResult(round="FINAL", slot_index=1, actual_team="France", match_played=True),
     ])
 
     # Special predictions + actuals
+    # Winner (150): still exact-match — predicted Argentina, actual FINAL slot 0
+    # is Argentina → award. Third (50): set-based — France appears in THIRD set
+    # (in slot 1) so the 50pt award triggers despite the slot mismatch.
     session.add(SpecialPrediction(
         user_id=user.id,
         predicted_winner="Argentina",
-        predicted_third="Brazil",
+        predicted_third="France",
         predicted_top_scorer="Harry Kane",
         tiebreaker_goals=170,
     ))
     session.add_all([
-        KnockoutResult(round="FINAL", slot_index=0, actual_team="Argentina", match_played=True),  # +150
-        KnockoutResult(round="THIRD", slot_index=0, actual_team="Spain", match_played=True),  # 0
+        KnockoutResult(round="THIRD", slot_index=0, actual_team="Spain", match_played=True),
+        KnockoutResult(round="THIRD", slot_index=1, actual_team="France", match_played=True),
     ])
     session.add(TopGoalscorer(name="harry kane"))  # +100 (case-insensitive)
     await session.commit()
@@ -250,9 +270,13 @@ async def test_compute_user_score_mixed_predictions(session: AsyncSession) -> No
     breakdown = await compute_user_score(user.id, session)
 
     assert breakdown["group_points"] == 4  # 3 (exact) + 1 (correct result) + 0
-    assert breakdown["knockout_points"] == 4  # R32 slot 0 only
-    assert breakdown["special_points"] == 250  # winner 150 + top scorer 100
-    assert breakdown["total"] == 258
+    # R32: Brazil + Germany match = 2 * 4 = 8.
+    # R16: Brazil matches by set membership = 1 * 8 = 8.
+    # FINAL: both finalists predicted (slots swapped) = 2 * 64 = 128.
+    assert breakdown["knockout_points"] == 144
+    # Winner 150 + third 50 + top scorer 100 = 300.
+    assert breakdown["special_points"] == 300
+    assert breakdown["total"] == 448
 
 
 @pytest.mark.asyncio

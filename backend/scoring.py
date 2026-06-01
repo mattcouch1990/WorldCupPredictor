@@ -297,8 +297,11 @@ async def compute_user_score(user_id: int, db: AsyncSession) -> dict[str, int]:
 
     Group points: 3 for an exact score, 1 for the correct result (W/D/L) only.
     Only matches with both a non-null prediction AND a stored actual result
-    count. Knockout points: per round, every correct team gets that round's
-    flat reward. Special points: tournament winner (150), 3rd place (50),
+    count. Knockout points: per round, every team the user predicted anywhere
+    in that round that also appears anywhere in the actual round earns the
+    round's reward (set membership, not slot match). Special points:
+    tournament winner (150, exact match vs ``predicted_winner``), 3rd place
+    (50, set membership of ``predicted_third`` in the actual THIRD round),
     top scorer (100, case-insensitive match).
     """
     group_points = 0
@@ -338,27 +341,34 @@ async def compute_user_score(user_id: int, db: AsyncSession) -> dict[str, int]:
     )).scalars().all()
     ko_results = (await db.execute(select(KnockoutResult))).scalars().all()
 
-    ko_actual: dict[tuple[str, int], str] = {
-        (r.round, r.slot_index): r.actual_team for r in ko_results
-    }
+    actual_by_slot: dict[tuple[str, int], str] = {}
+    actual_by_round: dict[str, set[str]] = {}
+    for r in ko_results:
+        actual_by_slot[(r.round, r.slot_index)] = r.actual_team
+        if r.actual_team:
+            actual_by_round.setdefault(r.round, set()).add(r.actual_team)
 
+    predicted_by_round: dict[str, set[str]] = {}
     for kp in ko_preds:
-        if kp.predicted_team is None:
-            continue
-        actual_team = ko_actual.get((kp.round, kp.slot_index))
-        if actual_team and actual_team == kp.predicted_team:
-            knockout_points += KNOCKOUT_POINTS.get(kp.round, 0)
+        if kp.predicted_team:
+            predicted_by_round.setdefault(kp.round, set()).add(kp.predicted_team)
+
+    for round_name, round_pts in KNOCKOUT_POINTS.items():
+        matches = predicted_by_round.get(round_name, set()) & actual_by_round.get(round_name, set())
+        knockout_points += len(matches) * round_pts
 
     special = (await db.execute(
         select(SpecialPrediction).where(SpecialPrediction.user_id == user_id)
     )).scalar_one_or_none()
 
     if special is not None:
-        winner_actual = ko_actual.get(("FINAL", 0))
-        third_actual = ko_actual.get(("THIRD", 0))
+        winner_actual = actual_by_slot.get(("FINAL", 0))
         if winner_actual and special.predicted_winner == winner_actual:
             special_points += WINNER_POINTS
-        if third_actual and special.predicted_third == third_actual:
+        if (
+            special.predicted_third
+            and special.predicted_third in actual_by_round.get("THIRD", set())
+        ):
             special_points += THIRD_PLACE_POINTS
 
         top_row = (await db.execute(select(TopGoalscorer))).scalar_one_or_none()
